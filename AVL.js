@@ -126,6 +126,33 @@ function search(curr, key) {
   }
   return 0;
 }
+// GET CURRENT HEIGHT/LEVEL OF A NODE
+function getHeight(node) {
+  if(node === null)  {
+    return 0;
+  }else {
+    return Math.max(getHeight(node.left),getHeight(node.right)) + 1;
+  }
+}
+
+// BUSCANDO EL MÍNIMO ELEMENTO EN EL AVL
+function minimo(curr) {
+  unhighlightAll(root);
+  curr.highlighted = true;
+  self.postMessage([root, msg, '']);
+  if (curr.left===null) { // if key < current node's data then look at the left subtree
+    msg = 'El minimo final es ' + curr.data + '. última hoja.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return curr.data;    
+  }
+  else{
+    msg = 'El minimo temporal es ' + curr.data + '. Se va por el subarbol izquierdo.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return minimo(curr.left);  
+  } 
+}
 
 // DELETE AN ELEMENT FROM THE TREE
 function pop(startingNode, key) {
@@ -568,6 +595,18 @@ self.addEventListener('message', (event) => {
         self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
       }
       break;
+    }
+    case 'Min': {
+      const key = event.data[1]; // get value from user input
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        minimo(root);
+        unhighlightAll(root); // unhighlight all nodes
+        self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      }
+      break;    
     }
     case 'Print Pre Order': {
       if (root == null) {
