@@ -114,7 +114,7 @@ function displayNode(curr) {
     noStroke();
     fill('red');
     if (curr.highlighted) ellipse(curr.x, curr.y, 40, 40);
-    fill(231, 173, 173);
+    fill(209, 227, 56);
     ellipse(curr.x, curr.y, 30, 30);
     fill('black');
     text(curr.data, curr.x, curr.y + 5);

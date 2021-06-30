@@ -293,7 +293,7 @@ function rotateLL (node) {
 
    // Rotación simple a la derecha
 function rotateRR (node) {
-  mostrarProceso(node,'Se realiza rotacion a la derecha');
+  showProcess(node,'Se realiza rotacion a la derecha');
   let tmp = node.left;
   // cambiar coordenadas 
   let nodeParent = node.parent;
