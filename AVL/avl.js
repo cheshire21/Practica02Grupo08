@@ -1,435 +1,656 @@
-/*
+/* -------------------------------------------------------------------------------
+This code is licensed under MIT License.
+
+Copyright (c) 2019 I Putu Prema Ananda D.N
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+---------------------------------------------------------------------------------- */
+
+/* eslint-disable no-restricted-globals */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-lonely-if */
+/* eslint-disable no-else-return */
+/* eslint-disable brace-style */
+/* eslint-disable func-names */
+
+let root = null;
+let lastState = null;
+let msg = '';
+let printOutput = '';
+let canvasWidth;
+let delay = 1000;
+
 class Node {
-  constructor(value) {
-    this.value = value
-    this.left = null
-    this.right = null
+  constructor(d, height, y, parent, loc) {
+    if (d instanceof Node) { // if parameter passed is a node then use all properties of the node to be cloned for the new node
+      this.data = d.data;
+      this.left = d.left;
+      this.right = d.right;
+      this.parent = d.parent;
+      this.loc = d.loc;
+      this.height = d.height;
+      this.x = d.x;
+      this.y = d.y;
+      this.highlighted = d.highlighted;
+    }
+    else {
+      this.data = d;
+      this.left = null;
+      this.right = null;
+      this.parent = parent;
+      this.loc = loc;
+      this.height = height;
+      this.x = canvasWidth / 2;
+      this.y = y;
+      this.highlighted = false;
+    }
   }
 }
-class BinarySearchTree {
-    constructor(value) {
-        this.root = new Node(value)
-    }
-    _insertNode(node, value) {
-        if(node.value > value){
-            if(node.left === null){
-                node.left = new Node(value)
-            }else{
-                this._insertNode(node.left, value)
-            }
-        }else{
-            if(node.right === null){
-                node.right = new Node(value)
-            }else{
-                this._insertNode(node.right, value)
-            }
-        }
-    }
-    insert(value) {
-        if(this.root === null) {
-            this.root = new Node(value)
-        }else{
-            this._insertNode(this.root, value)
-        }
-        return this
-    }
-    // Recorrido de orden medio: izquierda -> medio -> derecha
-    _inOrderTra(node, res) {
-        if(node === null) { return }
-        this._inOrderTra(node.left, res)
-        res.push(node.value)
-        this._inOrderTra(node.right, res)
-    }
-    inOrderTra() {
-        let res = []
-        this._inOrderTra(this.root, res)
-        return res
-    }
-    // Recorrido de preorden: medio -> izquierda -> derecha
-    _preOrderTra(node, res) {
-        if(node === null) { return }
-        res.push(node.value)
-        this._preOrderTra(node.left, res)
-        this._preOrderTra(node.right, res)
-    }
-    preOrderTra() {
-        let res = []
-        this._preOrderTra(this.root, res)
-        return res
-    }
-    // Recorrido posterior al pedido: izquierda -> derecha -> centro
-    _postOrderTra(node, res) {
-        if(node === null) { return }
-        this._postOrderTra(node.left, res)
-        this._postOrderTra(node.right, res)
-        res.push(node.value)
-    }
-    postOrderTra() {
-        let res = []
-        this._postOrderTra(this.root, res)
-        return res
-    }
-    _getMin(node) { 
-        if(node.left === null){ return node }
-        return this._getMin(node.left) 
-    }
-    getMin() {
-        return this._getMin(this.root)
-    }
-    _getMax(node) { 
-        if(node.right === null){ return node }
-        return this._getMax(node.right) 
-    }
-    getMax() {
-        return this._getMax(this.root)
-    }
-    _search(node, value) {
-        if(node.value > value) {
-            if(node.left === null) {
-                throw 'Function Search: ' + value + ' Extraviado'
-            }else if(node.left.value === value) {
-                return node.left
-            }else {
-                return this._search(node.left, value)
-            }
-        }else {
-            if(node.right === null) {
-                throw 'Function Search: ' + value + ' Extraviado'
-            }else if(node.right.value === value) {
-                return node.right
-            }else {
-                return this._search(node.right, value)
-            }
-        }
-    }
-    search(value) {
-        if(value === this.root.value){
-            return this.root
-        }
-        return this._search(this.root, value)
-    }
-    _removeNode(target, node=this.root) {
-        // Encuentra el nodo padre del nodo eliminado
-        if(node.left !== target && node.right !== target){
-            if(node.value > target.value){
-                return this._removeNode(target, node.left)
-            }else{
-                return this._removeNode(target, node.right)
-            }
-        }
-        if(target.left === null && target.right === null){
-            // El nodo eliminado no tiene hijos
-            return node.left === target ? node.left = null : node.right = null
-        }else if(target.left === null || target.right === null){
-            // El nodo eliminado contiene solo un nodo hijo
-            const son = target.left === null ? target.right : target.left
-            return node.left === target ? node.left = son : node.right = son
-        }else if(target.left !== null && target.right !== null){
-            // El nodo eliminado contiene dos nodos secundarios
-            const displace = this._getMin(target.right)
-            return node.left === target ? node.left = displace : node.right = displace
-        }
-    }
-    remove(value) {
-        const target = this.search(value)
-        if(target === this.root){
-            throw 'Función eliminar: no se puede eliminar el nodo raíz'
-        }
-        this._removeNode(target)
-        return this
-    }
+
+// CLONE THE CURRENT TREE INCLUDING ITS CHILD AND THE CHILD OF ITS CHILD AND SO ON..
+function treeClone(node) {
+  if (node == null) return null;
+  const neww = new Node(node);
+  neww.left = treeClone(node.left);
+  neww.right = treeClone(node.right);
+  return neww;
 }
 
+// DELAY CODE EXECUTION FOR SPECIFIED MILLISECONDS
+function sleep(ms) {
+  const start = Date.now();
+  while (Date.now() < start + ms);
+}
 
-class AVL extends BinarySearchTree {
-    constructor(superConstructor) {
-        super(superConstructor)
+// UNHIGHLIGHT ALL NODES
+function unhighlightAll(node) {
+  if (node !== null) {
+    node.highlighted = false;
+    unhighlightAll(node.left);
+    unhighlightAll(node.right);
+  }
+}
+
+// GET CURRENT HEIGHT/LEVEL OF A NODE
+function getHeight(node) {
+  if(node === null)  {
+    return 0;
+  }else {
+    return Math.max(getHeight(node.left),getHeight(node.right)) + 1;
+  }
+}
+
+// SEARCH AN ELEMENT IN THE TREE
+function search(curr, key) {
+  if (!curr) { // if current node is null then element does not exist in the tree
+    msg = 'Buscando ' + key + ' : (Elemento no encontrado)';
+    self.postMessage([root, msg, '']);
+    return 0;
+  }
+  unhighlightAll(root);
+  curr.highlighted = true;
+  self.postMessage([root, msg, '']);
+  if (key < curr.data) { // if key < current node's data then look at the left subtree
+    msg = 'Buscando ' + key + ' : ' + key + ' < ' + curr.data + '. Se va por el subarbol izquierdo.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    search(curr.left, key);
+  }
+  else if (key > curr.data) { // if key > current node's data then look at the right subtree
+    msg = 'Buscando ' + key + ' : ' + key + ' > ' + curr.data + '. Se va por el subarbol derecho.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    search(curr.right, key);
+  }
+  else { // notify the main thread that an element is found and highlight that element
+    msg = 'Buscando ' + key + ' : ' + key + ' == ' + curr.data + '. Elemento encontrado!';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+  }
+  return 0;
+}
+// GET CURRENT HEIGHT/LEVEL OF A NODE
+function getHeight(node) {
+  if(node === null)  {
+    return 0;
+  }else {
+    return Math.max(getHeight(node.left),getHeight(node.right)) + 1;
+  }
+}
+
+// BUSCANDO EL MÍNIMO ELEMENTO EN EL AVL
+function minimo(curr) {
+  unhighlightAll(root);
+  curr.highlighted = true;
+  self.postMessage([root, msg, '']);
+  if (curr.left===null) { // if key < current node's data then look at the left subtree
+    msg = 'El minimo final es ' + curr.data + '. última hoja.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return curr.data;    
+  }
+  else{
+    msg = 'El minimo temporal es ' + curr.data + '. Se va por el subarbol izquierdo.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return minimo(curr.left);  
+  } 
+}
+
+// DELETE AN ELEMENT FROM THE TREE
+function pop(startingNode, key) {
+  let node = startingNode;
+  if (!node) { // if current node is null then element to delete does not exist in the tree
+    msg = 'Searching for ' + key + ' : (Element not found)';
+    self.postMessage([root, msg, '']);
+    return null;
+  }
+  else {
+    unhighlightAll(root);
+    node.highlighted = true;
+    self.postMessage([root, msg, '']);
+    if (key < node.data) { // if key < current node's data then look at the left subtree
+      msg = 'Searching for ' + key + ' : ' + key + ' < ' + node.data + '. Looking at left subtree.';
+      self.postMessage([root, msg, '']);
+      sleep(delay);
+      node.left = pop(node.left, key);
     }
-    _getNodeHeight(node) {
-        if(node === null){
-            return -1
-        }
-        return Math.max(this._getNodeHeight(node.left), this._getNodeHeight(node.right))+1
+    else if (key > node.data) { // if key > current node's data then look at the right subtree
+      msg = 'Searching for ' + key + ' : ' + key + ' > ' + node.data + '. Looking at right subtree.';
+      self.postMessage([root, msg, '']);
+      sleep(delay);
+      node.right = pop(node.right, key);
     }
-    getNodeHeight(node=this.root) {
-        return this._getNodeHeight(node)
-    }
-    getBalanceFactory(node) {
-        const factory = this.getNodeHeight(node.left) - this.getNodeHeight(node.right)
-        return factory
-    }
-    // Rotación única a la derecha
-    rotationLL(node) {
-        const tar = node.left
-        try{
-            node.left = tar.right
-        }catch{
-            node.left = null
-        }
-        tar.right = node
-        return tar
-    }
-    // Rotación única a la izquierda
-    rotationRR(node) {
-        const tar = node.right
-        try{
-            node.right = tar.left
-        }catch{
-            node.right = null
-        }
-        tar.left = node
-        return tar
-    }
-    // Doble rotación a la derecha
-    rotationRL(node) {
-        node.right = this.rotationLL(node.right)
-        return this.rotationRR(node)
-    }
-    // Doble rotación a la izquierda
-    rotationLR(node) {
-        node.left = this.rotationRR(node.left)
-        return this.rotationLL(node)
-    }
-    _changeToBalance(node) {
-        switch(this.getBalanceFactory(node)){
-          case 2:
-              const factoryLeft = this.getBalanceFactory(node.left)
-              if([0,1].indexOf(factoryLeft) !== -1 || factoryLeft > 2){
-                  console.info('2 0 1')
-                  node = this.rotationLL(node)
-              }else if(factoryLeft === -1){
-                  console.info('2 -1')
-                  node = this.rotationLR(node)
-              }else if(factoryLeft === 2){
-                  console.info('2 2')
-                  node.left = this._changeToBalance(node.left)
-              }else if(factoryLeft === -2){
-                  console.info('2 -2')
-                  node.left = this._changeToBalance(node.left)
-              }
-              return node
-          case -2:
-              const factoryRight = this.getBalanceFactory(node.right)
-              if([0,1].indexOf(factoryRight) !== -1){
-                  console.info('-2 0 1')
-                  node = this.rotationRL(node)
-              }else if(factoryRight === -1 || factoryRight < -2){
-                  console.info('-2 -1')
-                  node = this.rotationRR(node)
-              }else if(factoryRight === 2){
-                  console.info('-2 2')
-                  node.right = this._changeToBalance(node.right)
-              }else if(factoryRight === -2){
-                  console.info('-2 -2')
-                  node.right = this._changeToBalance(node.right)
-                  console.info(node.right)
-              }
-              return node
+    else {
+      msg = key + ' == ' + node.data + '. Found node to delete.'; // notify the main thread that node to delete is found.
+      self.postMessage([root, msg, '']);
+      sleep(delay);
+      if (!node.left && !node.right) { // if node has no child (is a leaf) then just delete it.
+        msg = 'Node to delete is a leaf. Delete it.';
+        node = null;
+        self.postMessage([root, msg, '']);
       }
-        return node
+      else if (!node.left) { // if node has RIGHT child then set parent of deleted node to right child of deleted node
+        msg = 'Node to delete has no left child.\nSet parent of deleted node to right child of deleted node';
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        // CODE FOR BLINKING ANIMATION AND BLA BLA BLA..
+        for (let i = 0; i < 2; i += 1) {
+          node.right.highlighted = true;
+          if (node === root) node.highlighted = true;
+          else node.parent.highlighted = true;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+          node.right.highlighted = false;
+          if (node === root) node.highlighted = false;
+          else node.parent.highlighted = false;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+        }
+        // END CODE FOR BLINKING ANIMATION AND BLA BLA BLA..
+        let del = node;
+        node.right.parent = node.parent;
+        node.right.loc = node.loc;
+        node = node.right;
+        del = null;
+        node.y -= 40;
+      }
+      else if (!node.right) { // if node has LEFT child then set parent of deleted node to left child of deleted node
+        msg = 'Node to delete has no right child.\nSet parent of deleted node to left child of deleted node';
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        for (let i = 0; i < 2; i += 1) {
+          node.left.highlighted = true;
+          if (node === root) node.highlighted = true;
+          else node.parent.highlighted = true;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+          node.left.highlighted = false;
+          if (node === root) node.highlighted = false;
+          else node.parent.highlighted = false;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+        }
+        let del = node;
+        node.left.parent = node.parent;
+        node.left.loc = node.loc;
+        node = node.left;
+        del = null;
+        node.y -= 40;
+      }
+      else { // if node has TWO children then find largest node in the left subtree. Copy the value of it into node to delete. After that, recursively delete the largest node in the left subtree
+        msg = 'Node to delete has two children.\nFind largest node in left subtree.';
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        let largestLeft = node.left;
+        while (largestLeft.right) {
+          unhighlightAll(root);
+          largestLeft.highlighted = true;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+          largestLeft = largestLeft.right;
+        }
+        unhighlightAll(root);
+        largestLeft.highlighted = true;
+        msg = 'Largest node in left subtree is ' + largestLeft.data + '.\nCopy largest value of left subtree into node to delete.';
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        // CODE FOR BLINKING ANIMATION AND BLA BLA BLA...
+        for (let i = 0; i < 2; i += 1) {
+          largestLeft.highlighted = true;
+          node.highlighted = true;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+          largestLeft.highlighted = false;
+          node.highlighted = false;
+          self.postMessage([root, msg, '']);
+          sleep(delay / 2);
+        }
+        // END CODE FOR BLINKING ANIMATION AND BLA BLA BLA...
+        node.data = largestLeft.data;
+        unhighlightAll(root);
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        msg = 'Recursively delete largest node in left subtree';
+        self.postMessage([root, msg, '']);
+        sleep(delay);
+        node.left = pop(node.left, largestLeft.data);
+      }
     }
-    checkIsBalance() {
-        this.root = this._changeToBalance(this.root)
-        return this
-    }
-    insert(value) {
-        super.insert(value)
-        return this.checkIsBalance()
-    }
-    remove(value) {
-        super.remove(value)
-        return this.checkIsBalance()
-    }
+  }
+  if (node == null) return node;
+
+  node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1; // update the heights of all nodes traversed by the pop() function
+
+  return node; // return the modifications back to the caller
 }
-*/
-function AVLTreeNode(key) {
 
-    this.key = key;
-    this.leftChild = null;
-    this.rightChild = null;
-    this.parent = null;
+function showProcess(node, mensaje){
+  node.highlighted = true;
+  updatePosition(root);
+  msg = 'En el nodo '+ node.data + ' ' + mensaje;
+  self.postMessage([root, msg, '']);
+  sleep(delay);
+  node.highlighted = false;
+}
+//CHECK THE BALANCE 
+function rotateLL (node) {
+  showProcess(node,'Se realiza rotacion a la izquierda');
+  let tmp = node.right;
+  //cambiando coordenadas 
+  let nodeParent = node.parent;
+  let nodeloc = node.loc;
+
+  node.parent = tmp;
+  node.loc = 'left';
+
+  
+  
+  node.right = tmp.left;
+  if (node.right != null){
+    node.right.loc = 'right';
+    node.right.parent = node;
+  }
+
+
+  tmp.parent = nodeParent;
+  tmp.loc = nodeloc;
+  
+  tmp.left = node;
+    
+  return tmp;
+};
+
+   // Rotación simple a la derecha
+function rotateRR (node) {
+  showProcess(node,'Se realiza rotacion a la derecha');
+  let tmp = node.left;
+  // cambiar coordenadas 
+  let nodeParent = node.parent;
+  let nodeloc = node.loc;
+
+  node.parent = tmp;
+  node.loc = 'right';
+
+
+  node.left = tmp.right;
+  
+  if(node.left != null){
+    node.left.loc = 'left'; 
+    node.left.parent = node
+  }
+  
+  tmp.parent = nodeParent;
+  tmp.loc = nodeloc;
+  
+  tmp.right = node;
+
+  return tmp;
+};
+
+   // Doble rotación de izquierda a derecha
+function rotateLR(node) {
+  node.left = rotateLL(node.left);
+  return rotateRR(node);
+};
+
+   // Doble rotación primero a la derecha y luego a la izquierda
+function rotateRL (node) {
+  node.right = rotateRR(node.right);
+  return rotateLL(node);
+};
+function checkIsBalance(node) {
+  if (node == null) {
+      return node;
+  }
+           // La altura del subárbol izquierdo es mayor que la altura del subárbol derecho El factor de equilibrio del nodo primario es -2  
+  if (getHeight(node.left) - getHeight(node.right) > 1) {
+      if (getHeight(node.left.left) >= getHeight(node.left.right)) {
+                           // Si la altura del subárbol izquierdo del subárbol izquierdo es mayor o igual que la altura del subárbol derecho del subárbol izquierdo, los subnodos izquierdos son -1 y 0
+                           // giro directo a la derecha
+          node = rotateRR(node);
+      } else {
+          
+          console.log('LR',node);
+          node = rotateLR(node);
+          
+      }
+                   // La altura del subárbol derecho es mayor que la altura del subárbol izquierdo en 1 y el factor de equilibrio del nodo primario es 2
+  } else if (getHeight(node.right) - getHeight(node.left) > 1) {
+      if (getHeight(node.right.right) >= getHeight(node.right.left)) {
+                           // Si la altura del subárbol derecho del subárbol derecho es mayor o igual que la altura del subárbol izquierdo del subárbol derecho
+                           // Rotación simple izquierda directa
+          node = rotateLL(node);
+      } else {
+                           // De lo contrario, se requiere doble rotación derecha e izquierda
+          node = rotateRL(node);
+          
+      }
+  }
+  return node;
+}
+// INSERT AN ELEMENT TO THE TREE
+function push(node, data, posY, parent, loc) {
+  let curr = node;
+
+  if (curr != null) { // highlight current node in each recursion step
+    curr.highlighted = true;
+    self.postMessage([root, msg, '']);
+  }
+
+  if (curr == null) { // if current node is null then place the new node there
+    msg = 'Encontrodo nodo NULL. Insertando ' + data + '.';
+    curr = new Node(data, 1, posY, parent, loc);
+    
+    
+  }
+  else if (data < curr.data) { // if new data < current node's data, then go to left subtree
+    msg = data + ' < ' + curr.data + '. Se va por el subarbol Izquierdo.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    curr.highlighted = false;
+    curr.left = push(curr.left, data, posY + 40, curr, 'left');
+
+    // check balance 
+    console.log(curr);
+     curr = checkIsBalance(curr);
+  }
+  else if (data >= curr.data) { // if new data >= current node's data, then go to right subtree
+    msg = data + ' >= ' + curr.data + '. Se va por el subarbol Derecha.';
+    self.postMessage([root, msg, '']);
+    sleep(delay);
+    curr.highlighted = false;
+    curr.right = push(curr.right, data, posY + 40, curr, 'right');
+
+    //check balance 
+    console.log(curr);
+    
+    curr = checkIsBalance(curr);
+  }
+
+  curr.height = Math.max(getHeight(curr.left), getHeight(curr.right)) + 1; // update the heights of all nodes traversed by the push() function
+
+  return curr; // return the modifications back to the caller
 }
 
-/**
-   * Constructor del árbol AVL. Si no se pasa un nombre de clave válido, use los datos para la comparación; de lo contrario, use los datos [keyName] para la comparación
- *
-   * @param {string} [keyName] -opcional parámetro. Nombre del campo del código clave en los datos
- * @constructor
- */
-function AVLTree(keyName) {
 
-
-    this.root = null;
-
-         // Así es como calculamos la altura del nodo actual, recursivamente
-    let getHeight = function (node) {
-                 // 0 si no
-        if(node === null) {
-            return 0;
-        } else {
-            return Math.max(getHeight(node.leftChild),getHeight(node.rightChild)) + 1;
-        }
-    };
-         // Rotación simple a la izquierda
-    let rotateLL = function (node) {
-        let tmp = node.rightChild;
-        node.rightChild = tmp.leftChild;
-        tmp.leftChild = node;
-        return tmp;
-    };
-
-         // Rotación simple a la derecha
-    let rotateRR = function (node) {
-
-        let tmp = node.leftChild;
-        node.leftChild = tmp.rightChild;
-        tmp.rightChild = node;
-        return tmp;
-    };
-
-         // Doble rotación de izquierda a derecha
-    let rotateLR = function (node) {
-        node.leftChild = rotateLL(node.leftChild);
-        return rotateRR(node);
-    };
-
-         // Doble rotación primero a la derecha y luego a la izquierda
-    let rotateRL = function (node) {
-        node.rightChild = rotateRR(node.rightChild);
-        return rotateLL(node);
-    };
-         // El método garantiza el equilibrio de todo el árbol.
-    function checkIsBalance(node) {
-        if (node == null) {
-            return node;
-        }
-                 // La altura del subárbol izquierdo es mayor que la altura del subárbol derecho El factor de equilibrio del nodo primario es -2  
-        if (getHeight(node.leftChild) - getHeight(node.rightChild) > 1) {
-            if (getHeight(node.leftChild.leftChild) >= getHeight(node.leftChild.rightChild)) {
-                                 // Si la altura del subárbol izquierdo del subárbol izquierdo es mayor o igual que la altura del subárbol derecho del subárbol izquierdo, los subnodos izquierdos son -1 y 0
-                                 // giro directo a la derecha
-                node = rotateRR(node);
-            } else {
-                             // Si el nodo secundario izquierdo es 1, debe girar a la izquierda y luego a la derecha
-                node = rotateLR(node);
-            }
-                         // La altura del subárbol derecho es mayor que la altura del subárbol izquierdo en 1 y el factor de equilibrio del nodo primario es 2
-        } else if (getHeight(node.rightChild) - getHeight(node.leftChild) > 1) {
-            if (getHeight(node.rightChild.rightChild) >= getHeight(node.rightChild.leftChild)) {
-                                 // Si la altura del subárbol derecho del subárbol derecho es mayor o igual que la altura del subárbol izquierdo del subárbol derecho
-                                 // Rotación simple izquierda directa
-                node = rotateLL(node);
-            } else {
-                                 // De lo contrario, se requiere doble rotación derecha e izquierda
-                node = rotateRL(node);
-            }
-        }
-        return node;
+// AFTER INSERT OR DELETE, ALWAYS UPDATE ALL NODES POSITION IN THE CANVAS
+// FORMULA FOR DETERMINING NODE POSITION IS: (NODE'S PARENT POSITION - ((2 ^ (NODE'S CURRENT HEIGHT + 1)) * 10)))
+function updatePosition(node) {
+  if (node != null) {
+    if (node.loc === 'left') node.x = node.parent.x - ((2 ** (getHeight(node.right) + 1)) * 10);
+    else if (node.loc === 'right') node.x = node.parent.x + ((2 ** (getHeight(node.left) + 1)) * 10);
+    else if (node.loc === 'root') {
+      node.x = canvasWidth / 2;
+      node.y = 50;
     }
-     // Método de inserción:
-    let insertNode = function(node, newNode){
-
-        if (node == null){
-            node = newNode;
-            return node;
-        } else if (newNode.key < node.key){
-                   // Insertar en el subárbol izquierdo es lo mismo que buscar en el árbol binario
-            if (node.leftChild === null){
-                node.leftChild = newNode;
-                return node;
-            } else {
-                node.leftChild = insertNode(node.leftChild, newNode);
-                                 // Actualiza todo el árbol
-                node = checkIsBalance(node);
-            }
-        } else if (newNode.key > node.key){
-                     // Insertar en el subárbol derecho
-            if (node.rightChild === null){
-                node.rightChild = newNode;
-                return node;
-            } else {
-                node.rightChild = insertNode(node.rightChild, newNode);
-                node = checkIsBalance(node);
-            }
-        }
-        return node;
-    };
-
-
-    this.insert = function (data) {
-        let newNode = new AVLTreeNode(data);
-        this.root = insertNode(this.root, newNode);
-    };
-
-    this.delete = function (data) {
-        this.root = deleteData(this.root, data);
-    };
-     // Eliminar el nodo especificado
-    function deleteData(node, data) {
-        if( node === null){
-            return null;
-        }
-                 // Si es menor que, elimine en el subárbol izquierdo
-        if(data < node.key){
-            node.leftChild =  deleteData(node.leftChild, data);
-            node = checkIsBalance(node);
-
-            return node
-        }else if(data > node.key){
-            node.rightChild = deleteData(node.rightChild, data);
-            node = checkIsBalance(node);
-
-            return node
-        }else{
-                         // Los datos eliminados son iguales a node.key
-
-                         // Si este nodo tiene dos nodos secundarios
-            if(!!node.leftChild && !!node.rightChild){
-                let tempNode = node.rightChild;
-
-                while ( null !== tempNode.leftChild){
-                                         // Encuentra el nodo más pequeño en el subárbol derecho
-                    tempNode = tempNode.leftChild;
-                }
-                
-                                 // El nodo más pequeño en el subárbol derecho se asigna al nodo actual
-                node.key =  tempNode.key ;
-                                 // Eliminar el nodo con el valor más pequeño en el subárbol derecho
-                node.rightChild = deleteData(node.rightChild, tempNode.key);
-                node = checkIsBalance(node);
-
-                return node;
-
-            }else {
-                                 // Solo hay un nodo hoja
-                                 // nodo hoja
-                if( null === node.leftChild && null === node.rightChild){
-                    node = null;
-                    return node;
-                }
-                                 // Solo correcto
-                if( null === node.leftChild){
-                    node = node.rightChild;
-                    return node;
-                }else if( null === node.rightChild){
-                                         // Solo queda
-                    node = node.leftChild;
-                    return node;
-                }
-            }
-
-        }
-    }
-    this.print = function () {
-        console.log(this.root);
-        debugger
-        //return this.root
-    }
-    this.return_avl=function() {
-        // body...
-        var arr=[];
-        arr.push(this.root);
-        return arr//JSON.stringify(arr);
-    }
-
+    if (node.parent != null) node.y = node.parent.y + 40;
+    if (node.left != null) node.left.parent = node; // update parent information of current node
+    if (node.right != null) node.right.parent = node; // update parent information of current node
+    updatePosition(node.left);
+    updatePosition(node.right);
+  }
 }
+
+// PRINT ALL NODES PRE-ORDERLY. THE ROUTE IS C - L - R
+function printPreOrder(node) {
+  if (node !== null) {
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Printing the value';
+    printOutput = node.data;
+    self.postMessage([root, msg, printOutput + ' ', '']);
+    sleep(delay);
+    msg = 'Going to left subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printPreOrder(node.left);
+
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going to right subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printPreOrder(node.right);
+
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going back up';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+  else {
+    msg += '... NULL';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+}
+
+// PRINT ALL NODES IN-ORDERLY. THE ROUTE IS L - C - R
+function printInOrder(node) {
+  if (node !== null) {
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going to left subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printInOrder(node.left);
+
+    msg = 'Printing the value';
+    printOutput = node.data;
+    unhighlightAll(root);
+    node.highlighted = true;
+    self.postMessage([root, msg, printOutput + ' ', '']);
+    sleep(delay);
+    msg = 'Going to right subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printInOrder(node.right);
+
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going back up';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+  else {
+    msg += '... NULL';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+}
+
+// PRINT ALL NODES POST-ORDERLY. THE ROUTE IS L - R - C
+function printPostOrder(node) {
+  if (node !== null) {
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going to left subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printPostOrder(node.left);
+
+    unhighlightAll(root);
+    node.highlighted = true;
+    msg = 'Going to right subtree';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+
+    printPostOrder(node.right);
+
+    msg = 'Printing the value';
+    printOutput = node.data;
+    unhighlightAll(root);
+    node.highlighted = true;
+    self.postMessage([root, msg, printOutput + ' ', '']);
+    sleep(delay);
+    msg = 'Going back up';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+  else {
+    msg += '... NULL';
+    self.postMessage([root, msg, '', '']);
+    sleep(delay);
+  }
+}
+
+// EVENT LISTENER TO LISTEN COMMANDS FROM THE MAIN THREAD. THE TREE WILL EXECUTE EVERYTHING THE MAIN THREAD WANTS.
+// AT EACH STEP IN THE ALGORITHM, THE TREE WILL NOTIFY THE MAIN THREAD ABOUT CHANGES IN THE TREE SO THE MAIN THREAD CAN DISPLAY THE CHANGES STEP-BY-STEP TO USERS FOR EASIER UNDERSTANDING
+self.addEventListener('message', (event) => {
+  switch (event.data[0]) {
+    case 'Insert': {
+      lastState = treeClone(root); // save last state of the tree before inserting
+      const value = event.data[1]; // get value from user input
+      canvasWidth = event.data[2]; // get canvasWidth from main thread. Important for node positioning
+      root = push(root, value, 50, null, 'root'); // push it
+      updatePosition(root); // update all node position
+      self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      break;
+    }
+    case 'Delete': {
+      lastState = treeClone(root); // save last state of the tree before deleting
+      const key = event.data[1]; // get value from user input
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        root = pop(root, key); // delete it
+        updatePosition(root); // update the node position
+        unhighlightAll(root); // unhighlight all nodes
+        self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
+    case 'Find': {
+      const key = event.data[1]; // get value from user input
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        search(root, key);
+        unhighlightAll(root); // unhighlight all nodes
+        self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
+    case 'Min': {
+      const key = event.data[1]; // get value from user input
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        minimo(root);
+        unhighlightAll(root); // unhighlight all nodes
+        self.postMessage([root, msg, 'Finished']); // let main thread know that operation has finished
+      }
+      break;    
+    }
+    case 'Print Pre Order': {
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        printPreOrder(root);
+        unhighlightAll(root); // unhighlight all nodes after operation
+        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
+    case 'Print In Order': {
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        printInOrder(root);
+        unhighlightAll(root); // unhighlight all nodes after operation
+        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
+    case 'Print Post Order': {
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
+      }
+      else {
+        printPostOrder(root);
+        unhighlightAll(root); // unhighlight all nodes after operation
+        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
+      }
+      break;
+    }
+    case 'Undo': {
+      root = treeClone(lastState); // replace contents of current tree with the last tree state before deletion/insertion happened
+      updatePosition(root); // update node position
+      self.postMessage([root, '', 'Finished']); // let main thread know that operation has finished
+      break;
+    }
+    case 'Set Animation Speed': {
+      delay = event.data[1]; // get delay value from user input (slider)
+      break;
+    }
+    default: break;
+  }
+});
