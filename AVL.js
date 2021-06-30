@@ -255,8 +255,17 @@ function pop(startingNode, key) {
   return node; // return the modifications back to the caller
 }
 
+function showProcess(node, mensaje){
+  node.highlighted = true;
+  updatePosition(root);
+  msg = 'En el nodo '+ node.data + ' ' + mensaje;
+  self.postMessage([root, msg, '']);
+  sleep(delay);
+  node.highlighted = false;
+}
 //CHECK THE BALANCE 
 function rotateLL (node) {
+  showProcess(node,'Se realiza rotacion a la izquierda');
   let tmp = node.right;
   //cambiando coordenadas 
   let nodeParent = node.parent;
@@ -284,6 +293,7 @@ function rotateLL (node) {
 
    // Rotación simple a la derecha
 function rotateRR (node) {
+  mostrarProceso(node,'Se realiza rotacion a la derecha');
   let tmp = node.left;
   // cambiar coordenadas 
   let nodeParent = node.parent;
