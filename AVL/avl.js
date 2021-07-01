@@ -22,13 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ---------------------------------------------------------------------------------- */
 
-/* eslint-disable no-restricted-globals */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-lonely-if */
-/* eslint-disable no-else-return */
-/* eslint-disable brace-style */
-/* eslint-disable func-names */
 
 let root = null;
 let lastState = null;
@@ -450,114 +443,6 @@ function updatePosition(node) {
   }
 }
 
-// PRINT ALL NODES PRE-ORDERLY. THE ROUTE IS C - L - R
-function printPreOrder(node) {
-  if (node !== null) {
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Printing the value';
-    printOutput = node.data;
-    self.postMessage([root, msg, printOutput + ' ', '']);
-    sleep(delay);
-    msg = 'Going to left subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printPreOrder(node.left);
-
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going to right subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printPreOrder(node.right);
-
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going back up';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-  else {
-    msg += '... NULL';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-}
-
-// PRINT ALL NODES IN-ORDERLY. THE ROUTE IS L - C - R
-function printInOrder(node) {
-  if (node !== null) {
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going to left subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printInOrder(node.left);
-
-    msg = 'Printing the value';
-    printOutput = node.data;
-    unhighlightAll(root);
-    node.highlighted = true;
-    self.postMessage([root, msg, printOutput + ' ', '']);
-    sleep(delay);
-    msg = 'Going to right subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printInOrder(node.right);
-
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going back up';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-  else {
-    msg += '... NULL';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-}
-
-// PRINT ALL NODES POST-ORDERLY. THE ROUTE IS L - R - C
-function printPostOrder(node) {
-  if (node !== null) {
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going to left subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printPostOrder(node.left);
-
-    unhighlightAll(root);
-    node.highlighted = true;
-    msg = 'Going to right subtree';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-
-    printPostOrder(node.right);
-
-    msg = 'Printing the value';
-    printOutput = node.data;
-    unhighlightAll(root);
-    node.highlighted = true;
-    self.postMessage([root, msg, printOutput + ' ', '']);
-    sleep(delay);
-    msg = 'Going back up';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-  else {
-    msg += '... NULL';
-    self.postMessage([root, msg, '', '']);
-    sleep(delay);
-  }
-}
-
 // EVENT LISTENER TO LISTEN COMMANDS FROM THE MAIN THREAD. THE TREE WILL EXECUTE EVERYTHING THE MAIN THREAD WANTS.
 // AT EACH STEP IN THE ALGORITHM, THE TREE WILL NOTIFY THE MAIN THREAD ABOUT CHANGES IN THE TREE SO THE MAIN THREAD CAN DISPLAY THE CHANGES STEP-BY-STEP TO USERS FOR EASIER UNDERSTANDING
 self.addEventListener('message', (event) => {
@@ -609,50 +494,7 @@ self.addEventListener('message', (event) => {
       }
       break;    
     }
-    case 'Print Pre Order': {
-      if (root == null) {
-        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
-      }
-      else {
-        printPreOrder(root);
-        unhighlightAll(root); // unhighlight all nodes after operation
-        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
-      }
-      break;
-    }
->>>>>>> 06ce30959f7d3af6aa61cf52fc008bcc2d9cde47
-    case 'Print In Order': {
-      if (root == null) {
-        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
-      }
-      else {
-        printInOrder(root);
-        unhighlightAll(root); // unhighlight all nodes after operation
-        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
-      }
-      break;
-    }
-    case 'Print Post Order': {
-      if (root == null) {
-        self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty
-      }
-      else {
-        printPostOrder(root);
-        unhighlightAll(root); // unhighlight all nodes after operation
-        self.postMessage([root, 'Print Finished', '', 'Finished']); // let main thread know that operation has finished
-      }
-      break;
-    }
-    case 'Undo': {
-      root = treeClone(lastState); // replace contents of current tree with the last tree state before deletion/insertion happened
-      updatePosition(root); // update node position
-      self.postMessage([root, '', 'Finished']); // let main thread know that operation has finished
-      break;
-    }
-    case 'Set Animation Speed': {
-      delay = event.data[1]; // get delay value from user input (slider)
-      break;
-    }
+    
     default: break;
   }
 });

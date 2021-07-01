@@ -22,22 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ---------------------------------------------------------------------------------- */
 
-/* eslint-disable no-restricted-globals */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-lonely-if */
-/* eslint-disable no-else-return */
-/* eslint-disable brace-style */
-/* eslint-disable func-names */
-
-// BEGIN PREDEFINED DATASETS
-/* TODO: enable users to autofill tree with one of these datasets */
-// let num = [30, 15, 37, 7, 26, 19, 28, 32, 45, 34, 42, 36, 35, 31, 33, 6, 5, 4, 3, 29];
-// let num = [1000, 500, 2000, 505, 506, 1999, 1998, 504, 499, 498, 497, 496];
-// let num = [1000, 500, 2000, 505, 506, 1999, 504, 499, 1996, 2001];
-// let num = [1000, 500, 2000, 499];
-// END PREDEFINED DATASETS
-
 let tree = null;
 let controlDiv;
 let controlBar;
@@ -48,12 +32,6 @@ let deleteButton;
 let searchForm;
 let searchButton;
 let minButton;
-let printInOrderButton;
-let printPreOrderButton;
-let printPostOrderButton;
-let undoButton;
-let animationSpeedSliderLabel;
-let animationSpeedSlider;
 let lastMsg = '';
 let printOutput = '';
 let value;
@@ -68,11 +46,6 @@ function enableUI() {
   searchForm.removeAttribute('disabled');
   searchButton.removeAttribute('disabled');
   minButton.removeAttribute('disabled');
-  printPreOrderButton.removeAttribute('disabled');
-  printInOrderButton.removeAttribute('disabled');
-  printPostOrderButton.removeAttribute('disabled');
-  // undoButton.removeAttribute('disabled');
-  // animationSpeedSlider.removeAttribute('disabled');
 }
 
 function disableUI() {
@@ -83,27 +56,6 @@ function disableUI() {
   searchForm.attribute('disabled', '');
   searchButton.attribute('disabled', '');
   minButton.attribute('disabled', '');
-  printPreOrderButton.attribute('disabled', '');
-  printInOrderButton.attribute('disabled', '');
-  printPostOrderButton.attribute('disabled', '');
-  // undoButton.attribute('disabled', '');
-  // animationSpeedSlider.attribute('disabled', '');
-}
-
-function setAnimSpeed() {
-  const animDelay = Math.abs(animationSpeedSlider.value());
-  payload = ['Set Animation Speed', animDelay];
-  AVL.postMessage(payload);
-}
-
-function undo() {
-  payload = ['Undo'];
-  AVL.postMessage(payload);
-  AVL.onmessage = function (event) {
-    tree = event.data[0];
-    lastMsg = event.data[1];
-  };
-  undoButton.attribute('disabled', ''); // disable undo button after use.
 }
 
 function displayNode(curr) {
@@ -128,50 +80,6 @@ function displayNode(curr) {
   }
 }
 
-function printPreOrder() {
-  disableUI();
-  lastMsg = '';
-  printOutput = '';
-  payload = ['Print Pre Order'];
-  AVL.postMessage(payload); // send message 'Print Pre Order' to the AVL to print all elements pre-orderly
-  AVL.onmessage = function (event) {
-    tree = event.data[0];
-    lastMsg = event.data[1];
-    printOutput += event.data[2];
-    if (event.data[3] === 'Finished') enableUI();
-  };
-  return 0;
-}
-
-function printInOrder() {
-  disableUI();
-  lastMsg = '';
-  printOutput = '';
-  payload = ['Print In Order'];
-  AVL.postMessage(payload); // send message 'Print In Order' to the AVL to print all elements in-orderly
-  AVL.onmessage = function (event) {
-    tree = event.data[0];
-    lastMsg = event.data[1];
-    printOutput += event.data[2];
-    if (event.data[3] === 'Finished') enableUI();
-  };
-  return 0;
-}
-
-function printPostOrder() {
-  disableUI();
-  lastMsg = '';
-  printOutput = '';
-  payload = ['Print Post Order'];
-  AVL.postMessage(payload); // send message 'Print Post Order' to the AVL to print all elements post-orderly
-  AVL.onmessage = function (event) {
-    tree = event.data[0];
-    lastMsg = event.data[1];
-    printOutput += event.data[2];
-    if (event.data[3] === 'Finished') enableUI();
-  };
-  return 0;
-}
 
 function insert() {
   lastMsg = '';
@@ -278,7 +186,6 @@ function setup() {
   AVL = new Worker('AVL.js');
 
   // BEGIN VISUALIZATION CONTROLS STUFF
-
   controlBar = createDiv();//crea una etiqueta tabla
   controlBar.parent('mainContent');//coloca el div dentro del div con nombre maincontent
 
@@ -287,7 +194,6 @@ function setup() {
   controlDiv.id('controlSection'); // pone un id 
   
   controlBar.id('controles'); // pone un id 
-
   controlDiv.child(controlBar); //coloca la table dentro del Div anterior
   insertForm = addControls('Input', '', ''); //crea in textbox
   insertButton = addControls('Button', 'Insert', insert);
@@ -296,12 +202,6 @@ function setup() {
   searchForm = addControls('Input', '', '');
   searchButton = addControls('Button', 'Find', find);
   minButton = addControls('Button', 'MinValor', val_min);
-  printPreOrderButton = addControls('Button', 'Print Pre Order', printPreOrder);
-  printInOrderButton = addControls('Button', 'Print In Order', printInOrder);
-  printPostOrderButton = addControls('Button', 'Print Post Order', printPostOrder);
-  // undoButton = addControls('Button', 'Undo', undo);
-  // animationSpeedSliderLabel = addControls('Label', 'Animation Speed:', '');
-  // animationSpeedSlider = addControls('Slider', '', setAnimSpeed);
   // END VISUALIZATION CONTROLS STUFF
 
   // SET CANVAS AND TEXT SIZE
