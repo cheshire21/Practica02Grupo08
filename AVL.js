@@ -126,8 +126,6 @@ function search(curr, key) {
   }
   return 0;
 }
-
-
 // GET CURRENT HEIGHT/LEVEL OF A NODE
 function getHeight(node) {
   if(node === null)  {
@@ -155,6 +153,7 @@ function minimo(curr) {
     return minimo(curr.left);  
   } 
 }
+
 // DELETE AN ELEMENT FROM THE TREE
 function pop(startingNode, key) {
   let node = startingNode;
@@ -620,7 +619,6 @@ self.addEventListener('message', (event) => {
       }
       break;
     }
->>>>>>> 06ce30959f7d3af6aa61cf52fc008bcc2d9cde47
     case 'Print In Order': {
       if (root == null) {
         self.postMessage([root, 'Tree is empty', '', 'Finished']); // send message to main thread that the tree is empty

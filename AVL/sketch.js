@@ -47,6 +47,7 @@ let deleteForm;
 let deleteButton;
 let searchForm;
 let searchButton;
+let minButton;
 let printInOrderButton;
 let printPreOrderButton;
 let printPostOrderButton;
@@ -66,6 +67,7 @@ function enableUI() {
   deleteButton.removeAttribute('disabled');
   searchForm.removeAttribute('disabled');
   searchButton.removeAttribute('disabled');
+  minButton.removeAttribute('disabled');
   printPreOrderButton.removeAttribute('disabled');
   printInOrderButton.removeAttribute('disabled');
   printPostOrderButton.removeAttribute('disabled');
@@ -80,6 +82,7 @@ function disableUI() {
   deleteButton.attribute('disabled', '');
   searchForm.attribute('disabled', '');
   searchButton.attribute('disabled', '');
+  minButton.attribute('disabled', '');
   printPreOrderButton.attribute('disabled', '');
   printInOrderButton.attribute('disabled', '');
   printPostOrderButton.attribute('disabled', '');
@@ -114,7 +117,9 @@ function displayNode(curr) {
     noStroke();
     fill('red');
     if (curr.highlighted) ellipse(curr.x, curr.y, 40, 40);
+
     fill(209, 227, 79);
+
     ellipse(curr.x, curr.y, 30, 30);
     fill('black');
     text(curr.data, curr.x, curr.y + 5);
@@ -217,6 +222,24 @@ function find() {
     if (event.data[2] === 'Finished') enableUI();
   };
   return 0;
+  
+}
+function val_min() {
+  lastMsg = '';
+  printOutput = '';
+  //value = parseInt(searchForm.value(), 10);
+  //searchForm.value('');
+  //if (isNaN(value) === true) return undefined;
+  disableUI();
+  value=0;
+  payload = ['Min', value];
+  AVL.postMessage(payload); // send message 'Find' and inputted value to ask the Tree to find an element
+  AVL.onmessage = function (event) {
+    tree = event.data[0]; // receive our tree modifications from the AVL so the browser's main thread can display changes at each step in the algo instead of the final change
+    lastMsg = event.data[1]; // also receive message from the AVL after each step in the algorithm is done
+    if (event.data[2] === 'Finished') enableUI();
+  };
+  return 0;
 }
 
 function addControls(type, name, onClick) {
@@ -243,7 +266,10 @@ function addControls(type, name, onClick) {
   }
   const tableEntry = createElement('td');
   tableEntry.child(element);
+
   controlBar.child(element);
+
+  
   return element;
 }
 
@@ -252,6 +278,7 @@ function setup() {
   AVL = new Worker('AVL.js');
 
   // BEGIN VISUALIZATION CONTROLS STUFF
+
   controlBar = createDiv();//crea una etiqueta tabla
   controlBar.parent('mainContent');//coloca el div dentro del div con nombre maincontent
 
@@ -260,6 +287,7 @@ function setup() {
   controlDiv.id('controlSection'); // pone un id 
   
   controlBar.id('controles'); // pone un id 
+
   controlDiv.child(controlBar); //coloca la table dentro del Div anterior
   insertForm = addControls('Input', '', ''); //crea in textbox
   insertButton = addControls('Button', 'Insert', insert);
@@ -267,6 +295,7 @@ function setup() {
   deleteButton = addControls('Button', 'Delete', del);
   searchForm = addControls('Input', '', '');
   searchButton = addControls('Button', 'Find', find);
+  minButton = addControls('Button', 'MinValor', val_min);
   printPreOrderButton = addControls('Button', 'Print Pre Order', printPreOrder);
   printInOrderButton = addControls('Button', 'Print In Order', printInOrder);
   printPostOrderButton = addControls('Button', 'Print Post Order', printPostOrder);
