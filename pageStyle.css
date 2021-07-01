@@ -11,8 +11,9 @@ body {
 }
 
 #header {
-  padding: 0 10px 0 20px;
-  background: #960000; 
+  padding: 20px 10px 20px 20px;
+  background: #dd7d00; 
+
 }
 
 #header h1 {
@@ -21,9 +22,6 @@ body {
   color: #ffffff;
 }
 
-#controlSection {
-  background: #e7adad; 
-}
 
 #footer {
 	padding: 0 10px;

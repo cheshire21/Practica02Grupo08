@@ -114,7 +114,7 @@ function displayNode(curr) {
     noStroke();
     fill('red');
     if (curr.highlighted) ellipse(curr.x, curr.y, 40, 40);
-    fill(209, 227, 56);
+    fill(209, 227, 79);
     ellipse(curr.x, curr.y, 30, 30);
     fill('black');
     text(curr.data, curr.x, curr.y + 5);
@@ -243,7 +243,7 @@ function addControls(type, name, onClick) {
   }
   const tableEntry = createElement('td');
   tableEntry.child(element);
-  controlBar.child(tableEntry);
+  controlBar.child(element);
   return element;
 }
 
@@ -252,10 +252,14 @@ function setup() {
   AVL = new Worker('AVL.js');
 
   // BEGIN VISUALIZATION CONTROLS STUFF
+  controlBar = createDiv();//crea una etiqueta tabla
+  controlBar.parent('mainContent');//coloca el div dentro del div con nombre maincontent
+
   controlDiv = createDiv();//crea un div 
   controlDiv.parent('mainContent');//coloca el div dentro del div con nombre maincontent
   controlDiv.id('controlSection'); // pone un id 
-  controlBar = createElement('table');//crea una etiqueta tabla
+  
+  controlBar.id('controles'); // pone un id 
   controlDiv.child(controlBar); //coloca la table dentro del Div anterior
   insertForm = addControls('Input', '', ''); //crea in textbox
   insertButton = addControls('Button', 'Insert', insert);
