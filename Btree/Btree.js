@@ -29,33 +29,27 @@ function unhighlightAll(node) {
 }
 
 
-function search(curr, key) {
-  if (!curr) {
-    msg = 'Buscando ' + key + ' : (Elemento no encontrado)';
-    self.postMessage([root, msg, '']);
-    return 0;
+function search(node, key) {
+  if (node.childs.length == 0){
+    if(node.keys.find(element => element == key) != undefined){
+      msg = 'Se encontro el elemento ' +key ;
+      return ;
+    }else{
+      msg = 'No se encontro el elemento ' +key ;
+      return ;
+    }
   }
-  unhighlightAll(root);
-  curr.highlighted = true;
-  self.postMessage([root, msg, '']);
-  if (key < curr.data) { 
-    msg = 'Buscando ' + key + ' : ' + key + ' < ' + curr.data + '. Se va por el subarbol izquierdo.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    search(curr.left, key);
-  }
-  else if (key > curr.data) { 
-    msg = 'Buscando ' + key + ' : ' + key + ' > ' + curr.data + '. Se va por el subarbol derecho.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    search(curr.right, key);
-  }
-  else { 
-    msg = 'Buscando ' + key + ' : ' + key + ' == ' + curr.data + '. Elemento encontrado!';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-  }
-  return 0;
+  let i = 0;
+    while (key > node.keys[i] && i < node.keys.length) {
+      i += 1;
+      if (key == node.keys[i]){
+        msg = 'Se encontro el elemento ' +key ;
+        
+      }
+    }
+    if (node.childs[i]) {
+      search(node.childs[i],key);
+    }
 }
 
 // BUSCANDO EL MÍNIMO ELEMENTO EN EL B-TREE
@@ -75,134 +69,14 @@ function minimo_value(node) {
   }
 }
 function pop(startingNode, key) {
-  let node = startingNode;
-  if (!node) { // if current node is null then element to delete does not exist in the tree
-    msg = 'Searching for ' + key + ' : (Element not found)';
-    self.postMessage([root, msg, '']);
-    return null;
-  }
-  else {
-    unhighlightAll(root);
-    node.highlighted = true;
-    self.postMessage([root, msg, '']);
-    if (key < node.data) { // if key < current node's data then look at the left subtree
-      msg = 'Searching for ' + key + ' : ' + key + ' < ' + node.data + '. Looking at left subtree.';
-      self.postMessage([root, msg, '']);
-      sleep(delay);
-      node.left = pop(node.left, key);
-    }
-    else if (key > node.data) { // if key > current node's data then look at the right subtree
-      msg = 'Searching for ' + key + ' : ' + key + ' > ' + node.data + '. Looking at right subtree.';
-      self.postMessage([root, msg, '']);
-      sleep(delay);
-      node.right = pop(node.right, key);
-    }
-    else {
-      msg = key + ' == ' + node.data + '. Found node to delete.'; // notify the main thread that node to delete is found.
-      self.postMessage([root, msg, '']);
-      sleep(delay);
-      if (!node.left && !node.right) { // if node has no child (is a leaf) then just delete it.
-        msg = 'Node to delete is a leaf. Delete it.';
-        node = null;
-        self.postMessage([root, msg, '']);
-      }
-      else if (!node.left) { // if node has RIGHT child then set parent of deleted node to right child of deleted node
-        msg = 'Node to delete has no left child.\nSet parent of deleted node to right child of deleted node';
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-        for (let i = 0; i < 2; i += 1) {
-          node.right.highlighted = true;
-          if (node === root) node.highlighted = true;
-          else node.parent.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          node.right.highlighted = false;
-          if (node === root) node.highlighted = false;
-          else node.parent.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
-        
-        let del = node;
-        node.right.parent = node.parent;
-        node.right.loc = node.loc;
-        node = node.right;
-        del = null;
-        node.y -= 40;
-      }
-      else if (!node.right) { 
-        msg = 'Node to delete has no right child.\nSet parent of deleted node to left child of deleted node';
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-        for (let i = 0; i < 2; i += 1) {
-          node.left.highlighted = true;
-          if (node === root) node.highlighted = true;
-          else node.parent.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          node.left.highlighted = false;
-          if (node === root) node.highlighted = false;
-          else node.parent.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
-        let del = node;
-        node.left.parent = node.parent;
-        node.left.loc = node.loc;
-        node = node.left;
-        del = null;
-        node.y -= 40;
-      }
-      else { 
-        msg = 'Node to delete has two children.\nFind largest node in left subtree.';
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-        let largestLeft = node.left;
-        while (largestLeft.right) {
-          unhighlightAll(root);
-          largestLeft.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          largestLeft = largestLeft.right;
-        }
-        unhighlightAll(root);
-        largestLeft.highlighted = true;
-        msg = 'Largest node in left subtree is ' + largestLeft.data + '.\nCopy largest value of left subtree into node to delete.';
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-
-        for (let i = 0; i < 2; i += 1) {
-          largestLeft.highlighted = true;
-          node.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          largestLeft.highlighted = false;
-          node.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
-        node.data = largestLeft.data;
-        unhighlightAll(root);
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-        msg = 'Recursively delete largest node in left subtree';
-        self.postMessage([root, msg, '']);
-        sleep(delay);
-        node.left = pop(node.left, largestLeft.data);
-      }
-    }
-  }
-  if (node == null) return node;
-
-  node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1; 
-  return node;
+  // 
 }
 function split(node) {
-  if (node.keys.length !== node.degree * 2 - 1) {
+  if (node.keys.length !== node.degree - 1) {
     return;
   }
   lastMsg = 'dividiendo nodo';
-  const medianIndex = node.degree - 1;
+  const medianIndex = node.degree/2 - 1;
   const leftChild = new Node(node.degree, node);
   const rightChild = new Node(node.degree, node);
   node.childs.forEach((child, index) => {
@@ -247,10 +121,10 @@ function split(node) {
 }
 function push(node,value) {
   if (node == null){
-    node = new Node(2);
+    node = new Node(4);
   }
   // this.log();
-  if (node.keys.length === node.degree * 2 - 1) {
+  if (node.keys.length === node.degree- 1) {
     const { medianKey, rightChild, leftChild } = split(node);
     if (value > medianKey) {
       push(rightChild,value);
