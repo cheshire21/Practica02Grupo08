@@ -58,23 +58,21 @@ function search(curr, key) {
   return 0;
 }
 
-// BUSCANDO EL MÍNIMO ELEMENTO EN EL AVL
-function minimo(curr) {
-  unhighlightAll(root);
-  curr.highlighted = true;
-  self.postMessage([root, msg, '']);
-  if (curr.left===null) { // if key < current node's data then look at the left subtree
-    msg = 'El minimo final es ' + curr.data + '. última hoja.';
+// BUSCANDO EL MÍNIMO ELEMENTO EN EL B-TREE
+function minimo_value(node) {
+  
+ if(node.childs.length !== 0) {
+    msg = 'El minimo atual es ' + node.keys[0] + '. nos vamos a la última página.';
     self.postMessage([root, msg, '']);
     sleep(delay); 
-    return curr.data;    
+    return minimo_value(node.childs[0])
   }
   else{
-    msg = 'El minimo temporal es ' + curr.data + '. Se va por el subarbol izquierdo.';
+    msg = 'El minimo final es: ' + node.keys[0] + ' ';
     self.postMessage([root, msg, '']);
     sleep(delay); 
-    return minimo(curr.left);  
-  } 
+    return node.keys[0];    
+  }
 }
 function pop(startingNode, key) {
   let node = startingNode;
@@ -310,13 +308,12 @@ self.addEventListener('message', (event) => {
       }
       break;
     }
-    case 'Min': {
-      const key = event.data[1]; 
+    case 'Minimo': {
       if (root == null) {
         self.postMessage([root, 'Tree is empty', 'Finished']);
       }
       else {
-        minimo(root);
+        minimo_value(root);
         self.postMessage([root, msg, 'Finished']); 
       }
       break;    

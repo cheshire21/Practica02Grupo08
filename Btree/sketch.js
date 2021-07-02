@@ -140,18 +140,14 @@ function find() {
     lastMsg = event.data[1]; // also receive message from the Btree after each step in the algorithm is done
     if (event.data[2] === 'Finished') enableUI();
   };
-  return 0;
-  
+  return 0;  
 }
 function val_min() {
   lastMsg = '';
   printOutput = '';
-  //value = parseInt(searchForm.value(), 10);
-  //searchForm.value('');
-  //if (isNaN(value) === true) return undefined;
   disableUI();
   value=0;
-  payload = ['Min', value];
+  payload = ['Minimo', value,width];
   Btree.postMessage(payload); // send message 'Find' and inputted value to ask the Tree to find an element
   Btree.onmessage = function (event) {
     tree = event.data[0]; // receive our tree modifications from the Btree so the browser's main thread can display changes at each step in the algo instead of the final change
