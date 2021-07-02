@@ -6,29 +6,11 @@ let canvasWidth;
 let delay = 1000;
 
 class Node {
-  constructor(d, height, y, parent, loc) {
-    if (d instanceof Node) { // if parameter passed is a node then use all properties of the node to be cloned for the new node
-      this.data = d.data;
-      this.left = d.left;
-      this.right = d.right;
-      this.parent = d.parent;
-      this.loc = d.loc;
-      this.height = d.height;
-      this.x = d.x;
-      this.y = d.y;
-      this.highlighted = d.highlighted;
-    }
-    else {
-      this.data = d;
-      this.left = null;
-      this.right = null;
-      this.parent = parent;
-      this.loc = loc;
-      this.height = height;
-      this.x = canvasWidth / 2;
-      this.y = y;
-      this.highlighted = false;
-    }
+  constructor(degree, parent) {
+    this.degree = degree;
+    this.parent = parent;
+    this.keys = [];
+    this.childs = [];
   }
 }
 
@@ -43,14 +25,6 @@ function unhighlightAll(node) {
     node.highlighted = false;
     unhighlightAll(node.left);
     unhighlightAll(node.right);
-  }
-}
-
-function getHeight(node) {
-  if(node === null)  {
-    return 0;
-  }else {
-    return Math.max(getHeight(node.left),getHeight(node.right)) + 1;
   }
 }
 
@@ -84,16 +58,6 @@ function search(curr, key) {
   return 0;
 }
 
-
-// GET CURRENT HEIGHT/LEVEL OF A NODE
-function getHeight(node) {
-  if(node === null)  {
-    return 0;
-  }else {
-    return Math.max(getHeight(node.left),getHeight(node.right)) + 1;
-  }
-}
-
 // BUSCANDO EL MÍNIMO ELEMENTO EN EL AVL
 function minimo(curr) {
   unhighlightAll(root);
@@ -112,7 +76,6 @@ function minimo(curr) {
     return minimo(curr.left);  
   } 
 }
-// DELETE AN ELEMENT FROM THE TREE
 function pop(startingNode, key) {
   let node = startingNode;
   if (!node) { // if current node is null then element to delete does not exist in the tree
@@ -236,168 +199,86 @@ function pop(startingNode, key) {
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1; 
   return node;
 }
+function split(node) {
+  if (node.keys.length !== node.degree * 2 - 1) {
+    return;
+  }
+  lastMsg = 'dividiendo nodo';
+  const medianIndex = node.degree - 1;
+  const leftChild = new Node(node.degree, node);
+  const rightChild = new Node(node.degree, node);
+  node.childs.forEach((child, index) => {
+    if (index <= medianIndex) {
+      child.parent = leftChild;
+      leftChild.childs.push(child);
+    } else {
+      child.parent = rightChild;
+      rightChild.childs.push(child);
+    }
+  });
 
-function showProcess(node, mensaje){
-  node.highlighted = true;
-  updatePosition(root);
-  msg = 'En el nodo '+ node.data + ' ' + mensaje;
-  self.postMessage([root, msg, '']);
-  sleep(delay);
-  node.highlighted = false;
+  node.keys.forEach((key, index) => {
+    if (index < medianIndex) {
+      leftChild.keys.push(key);
+    } else if (index > medianIndex) {
+      rightChild.keys.push(key);
+    }
+  });
+
+  const medianKey = node.keys[medianIndex];
+  const parent = node.parent;
+  if (!parent) {
+    console.log('Este nodo es raiz')
+    node.keys = [medianKey];
+    node.childs = [leftChild, rightChild];
+  } else {
+    console.log('plug in the new child to the parent of current node')
+    rightChild.parent = parent;
+    leftChild.parent = parent;
+    const childIndex = parent.childs.findIndex((c) => c == node);
+    node.parent.childs[childIndex] = leftChild;
+    node.parent.childs.splice(childIndex + 1, 0, rightChild);
+    let i;
+    for (i = 0; i < parent.keys.length; i++) {
+      if (parent.keys[i] >= medianKey) {
+        break;
+      }
+    }
+    node.parent.keys.splice(i, 0, medianKey);
+  }
+  return { medianKey, leftChild, rightChild };
 }
-//CHECK THE BALANCE 
-function rotateLL (node) {
-  showProcess(node,'Se realiza rotacion a la izquierda');
-  let tmp = node.right;
-  //cambiando coordenadas 
-  let nodeParent = node.parent;
-  let nodeloc = node.loc;
-
-  node.parent = tmp;
-  node.loc = 'left';
-
-  
-  
-  node.right = tmp.left;
-  if (node.right != null){
-    node.right.loc = 'right';
-    node.right.parent = node;
+function push(node,value) {
+  if (node == null){
+    node = new Node(2);
   }
-
-
-  tmp.parent = nodeParent;
-  tmp.loc = nodeloc;
-  
-  tmp.left = node;
-    
-  return tmp;
-};
-
-   // Rotación simple a la derecha
-function rotateRR (node) {
-  showProcess(node,'Se realiza rotacion a la derecha');
-  let tmp = node.left;
-  // cambiar coordenadas 
-  let nodeParent = node.parent;
-  let nodeloc = node.loc;
-
-  node.parent = tmp;
-  node.loc = 'right';
-
-
-  node.left = tmp.right;
-  
-  if(node.left != null){
-    node.left.loc = 'left'; 
-    node.left.parent = node
-  }
-  
-  tmp.parent = nodeParent;
-  tmp.loc = nodeloc;
-  
-  tmp.right = node;
-
-  return tmp;
-};
-
-   // Doble rotación de izquierda a derecha
-function rotateLR(node) {
-  node.left = rotateLL(node.left);
-  return rotateRR(node);
-};
-
-   // Doble rotación primero a la derecha y luego a la izquierda
-function rotateRL (node) {
-  node.right = rotateRR(node.right);
-  return rotateLL(node);
-};
-function checkIsBalance(node) {
-  if (node == null) {
-      return node;
-  }
-           // La altura del subárbol izquierdo es mayor que la altura del subárbol derecho El factor de equilibrio del nodo primario es -2  
-  if (getHeight(node.left) - getHeight(node.right) > 1) {
-      if (getHeight(node.left.left) >= getHeight(node.left.right)) {
-                           // Si la altura del subárbol izquierdo del subárbol izquierdo es mayor o igual que la altura del subárbol derecho del subárbol izquierdo, los subnodos izquierdos son -1 y 0
-                           // giro directo a la derecha
-          node = rotateRR(node);
-      } else {
-          
-          console.log('LR',node);
-          node = rotateLR(node);
-          
-      }
-                   // La altura del subárbol derecho es mayor que la altura del subárbol izquierdo en 1 y el factor de equilibrio del nodo primario es 2
-  } else if (getHeight(node.right) - getHeight(node.left) > 1) {
-      if (getHeight(node.right.right) >= getHeight(node.right.left)) {
-                           // Si la altura del subárbol derecho del subárbol derecho es mayor o igual que la altura del subárbol izquierdo del subárbol derecho
-                           // Rotación simple izquierda directa
-          node = rotateLL(node);
-      } else {
-                           // De lo contrario, se requiere doble rotación derecha e izquierda
-          node = rotateRL(node);
-          
-      }
+  // this.log();
+  if (node.keys.length === node.degree * 2 - 1) {
+    const { medianKey, rightChild, leftChild } = split(node);
+    if (value > medianKey) {
+      msg = 'insertar clave en hijo derecho';
+      push(rightChild,value);
+    } else {
+      msg = 'insertar clave en hijo izquierdo';
+      push(leftChild,value);
+    }
+  } else {
+    let i = 0;
+    while (value > node.keys[i] && i < node.keys.length) {
+      i += 1;
+    }
+    if (node.childs[i]) {
+      
+      push(node.childs[i],value);
+    } else {
+      msg = 'Insercion en nodo hoja ';
+      node.keys.push(value);
+      node.keys.sort(function(a, b) {
+        return a - b;
+      });
+    }
   }
   return node;
-}
-// INSERT AN ELEMENT TO THE TREE
-function push(node, data, posY, parent, loc) {
-  let curr = node;
-
-  if (curr != null) { 
-    curr.highlighted = true;
-    self.postMessage([root, msg, '']);
-  }
-
-  if (curr == null) { 
-    msg = 'Encontrodo nodo NULL. Insertando ' + data + '.';
-    curr = new Node(data, 1, posY, parent, loc);
-    
-    
-  }
-  else if (data < curr.data) { 
-    msg = data + ' < ' + curr.data + '. Se va por el subarbol Izquierdo.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    curr.highlighted = false;
-    curr.left = push(curr.left, data, posY + 40, curr, 'left');
-
-    // check balance 
-    console.log(curr);
-     curr = checkIsBalance(curr);
-  }
-  else if (data >= curr.data) { 
-    msg = data + ' >= ' + curr.data + '. Se va por el subarbol Derecha.';
-    self.postMessage([root, msg, '']);
-    sleep(delay);
-    curr.highlighted = false;
-    curr.right = push(curr.right, data, posY + 40, curr, 'right');
-
-    //check balance 
-    console.log(curr);
-    
-    curr = checkIsBalance(curr);
-  }
-
-
-  return curr; 
-}
-
-function updatePosition(node) {
-  if (node != null) {
-    if (node.loc === 'left') node.x = node.parent.x - ((2 ** (getHeight(node.right) + 1)) * 10);
-    else if (node.loc === 'right') node.x = node.parent.x + ((2 ** (getHeight(node.left) + 1)) * 10);
-    else if (node.loc === 'root') {
-      node.x = canvasWidth / 2;
-      node.y = 50;
-    }
-    if (node.parent != null) node.y = node.parent.y + 40;
-    if (node.left != null) node.left.parent = node; 
-    if (node.right != null) node.right.parent = node; 
-    updatePosition(node.left);
-    updatePosition(node.right);
-  }
 }
 
 self.addEventListener('message', (event) => {
@@ -405,8 +286,7 @@ self.addEventListener('message', (event) => {
     case 'Insert': {
       const value = event.data[1]; 
       canvasWidth = event.data[2];
-      root = push(root, value, 50, null, 'root'); 
-      updatePosition(root); 
+      root = push(root, value); 
       self.postMessage([root, msg, 'Finished']); 
       break;
     }
