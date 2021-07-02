@@ -232,7 +232,6 @@ function split(node) {
     node.keys = [medianKey];
     node.childs = [leftChild, rightChild];
   } else {
-    console.log('plug in the new child to the parent of current node')
     rightChild.parent = parent;
     leftChild.parent = parent;
     const childIndex = parent.childs.findIndex((c) => c == node);
@@ -256,10 +255,8 @@ function push(node,value) {
   if (node.keys.length === node.degree * 2 - 1) {
     const { medianKey, rightChild, leftChild } = split(node);
     if (value > medianKey) {
-      msg = 'insertar clave en hijo derecho';
       push(rightChild,value);
     } else {
-      msg = 'insertar clave en hijo izquierdo';
       push(leftChild,value);
     }
   } else {
@@ -298,7 +295,6 @@ self.addEventListener('message', (event) => {
       else {
         root = pop(root, key); 
         updatePosition(root); 
-        unhighlightAll(root);
         self.postMessage([root, msg, 'Finished']); 
       }
       break;
@@ -309,8 +305,7 @@ self.addEventListener('message', (event) => {
         self.postMessage([root, 'Tree is empty', 'Finished']); 
       }
       else {
-        search(root, key);
-        unhighlightAll(root); 
+        search(root, key); 
         self.postMessage([root, msg, 'Finished']); 
       }
       break;
@@ -322,7 +317,6 @@ self.addEventListener('message', (event) => {
       }
       else {
         minimo(root);
-        unhighlightAll(root); 
         self.postMessage([root, msg, 'Finished']); 
       }
       break;    
