@@ -115,8 +115,8 @@ function minimo(curr) {
 // DELETE AN ELEMENT FROM THE TREE
 function pop(startingNode, key) {
   let node = startingNode;
-  if (!node) { // if current node is null then element to delete does not exist in the tree
-    msg = 'Searching for ' + key + ' : (Element not found)';
+  if (!node) { 
+    msg = 'Busqueda de ' + key + ' : (Elemento no encontrado)';
     self.postMessage([root, msg, '']);
     return null;
   }
@@ -125,42 +125,33 @@ function pop(startingNode, key) {
     node.highlighted = true;
     self.postMessage([root, msg, '']);
     if (key < node.data) { // if key < current node's data then look at the left subtree
-      msg = 'Searching for ' + key + ' : ' + key + ' < ' + node.data + '. Looking at left subtree.';
+      msg = 'Busqueda de ' + key + ' : ' + key + ' < ' + node.data + '. Ver en subarbol izquierdo.';
       self.postMessage([root, msg, '']);
       sleep(delay);
       node.left = pop(node.left, key);
+      node.left = checkIsBalance(node.left);
     }
     else if (key > node.data) { // if key > current node's data then look at the right subtree
-      msg = 'Searching for ' + key + ' : ' + key + ' > ' + node.data + '. Looking at right subtree.';
+      msg = 'Busqueda de ' + key + ' : ' + key + ' > ' + node.data + '. Ver en subarbol derecho.';
       self.postMessage([root, msg, '']);
       sleep(delay);
       node.right = pop(node.right, key);
+      node.right = checkIsBalance(node.right);
     }
     else {
-      msg = key + ' == ' + node.data + '. Found node to delete.'; // notify the main thread that node to delete is found.
+      msg = key + ' == ' + node.data + '. Se encontro el nodo.'; // notify the main thread that node to delete is found.
       self.postMessage([root, msg, '']);
       sleep(delay);
       if (!node.left && !node.right) { // if node has no child (is a leaf) then just delete it.
-        msg = 'Node to delete is a leaf. Delete it.';
+        msg = 'Es un Nodo hoja .';
         node = null;
         self.postMessage([root, msg, '']);
       }
       else if (!node.left) { // if node has RIGHT child then set parent of deleted node to right child of deleted node
-        msg = 'Node to delete has no left child.\nSet parent of deleted node to right child of deleted node';
+        
         self.postMessage([root, msg, '']);
         sleep(delay);
-        for (let i = 0; i < 2; i += 1) {
-          node.right.highlighted = true;
-          if (node === root) node.highlighted = true;
-          else node.parent.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          node.right.highlighted = false;
-          if (node === root) node.highlighted = false;
-          else node.parent.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
+        
         
         let del = node;
         node.right.parent = node.parent;
@@ -170,21 +161,10 @@ function pop(startingNode, key) {
         node.y -= 40;
       }
       else if (!node.right) { 
-        msg = 'Node to delete has no right child.\nSet parent of deleted node to left child of deleted node';
+        
         self.postMessage([root, msg, '']);
         sleep(delay);
-        for (let i = 0; i < 2; i += 1) {
-          node.left.highlighted = true;
-          if (node === root) node.highlighted = true;
-          else node.parent.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          node.left.highlighted = false;
-          if (node === root) node.highlighted = false;
-          else node.parent.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
+        
         let del = node;
         node.left.parent = node.parent;
         node.left.loc = node.loc;
@@ -193,33 +173,18 @@ function pop(startingNode, key) {
         node.y -= 40;
       }
       else { 
-        msg = 'Node to delete has two children.\nFind largest node in left subtree.';
+        msg = 'Tiene dos hijos';
         self.postMessage([root, msg, '']);
         sleep(delay);
         let largestLeft = node.left;
-        while (largestLeft.right) {
-          unhighlightAll(root);
-          largestLeft.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          largestLeft = largestLeft.right;
-        }
+        
         unhighlightAll(root);
         largestLeft.highlighted = true;
-        msg = 'Largest node in left subtree is ' + largestLeft.data + '.\nCopy largest value of left subtree into node to delete.';
+        
         self.postMessage([root, msg, '']);
         sleep(delay);
 
-        for (let i = 0; i < 2; i += 1) {
-          largestLeft.highlighted = true;
-          node.highlighted = true;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-          largestLeft.highlighted = false;
-          node.highlighted = false;
-          self.postMessage([root, msg, '']);
-          sleep(delay / 2);
-        }
+        
         node.data = largestLeft.data;
         unhighlightAll(root);
         self.postMessage([root, msg, '']);
@@ -228,6 +193,8 @@ function pop(startingNode, key) {
         self.postMessage([root, msg, '']);
         sleep(delay);
         node.left = pop(node.left, largestLeft.data);
+        
+        node = checkIsBalance(node);
       }
     }
   }
@@ -236,6 +203,7 @@ function pop(startingNode, key) {
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1; 
   return node;
 }
+
 
 function showProcess(node, mensaje){
   node.highlighted = true;
