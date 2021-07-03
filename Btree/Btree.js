@@ -11,6 +11,7 @@ class Node {
     this.parent = parent;
     this.keys = [];
     this.childs = [];
+    this.allchils=[];
   }
 }
 
@@ -87,8 +88,8 @@ if(node.childs.length !== 0) {
 // GET INDEX VALUE FROM ARRAY
 function popindex(node, key) {
   let j = 0;
-  for(i=0;i<node.keys.length;i++){
-    if (key == node.keys[i]){
+  for(i=0;i<node.allchils.length;i++){
+    if (key == node.allchils[i]){
       msg = 'Se encontro el elemento ' +key ;
       j=i;
       break;
@@ -99,15 +100,15 @@ function popindex(node, key) {
 
 // ELIMINAR UN NODO
 function pop(node, key) {
-  if (node.childs.length == 0){
-    if(node.keys.find(element => element == key) != undefined){
+  if (node.allchils.length > 0){
+    if(node.allchils.find(element => element == key) != undefined){
       msg = 'Se encontro el elemento ' +key ;
       var j=popindex(node,key);
-      var ja=node.keys;
+      var ja=node.allchils;
       var ja=ja.splice(j,1);
       var xnode=null;
-      for(var z=0;z<node.keys.length;z++){
-        var k=node.keys[z];
+      for(var z=0;z<node.allchils.length;z++){
+        var k=node.allchils[z];
         sleep(delay); 
         xnode=push(xnode,k)
       } 
@@ -197,6 +198,7 @@ function push(node,value) {
       });
     }
   }
+  node.allchils.push(value);
   return node;
 }
 
