@@ -112,6 +112,27 @@ function minimo(curr) {
     return minimo(curr.left);  
   } 
 }
+
+// BUSCANDO EL MÁXIMO ELEMENTO EN EL AVL
+function maximo(curr) {
+  unhighlightAll(root);
+  curr.highlighted = true;
+  self.postMessage([root, msg, '']);
+  if (curr.right===null) { // if key < current node's data then look at the left subtree
+    msg = 'El máximo final es ' + curr.data + ' . última hoja.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return curr.data;    
+  }
+  else{
+    msg = 'El máximo temporal es ' + curr.data + ' . Se va por el subárbol derecho.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return maximo(curr.right);  
+  } 
+}
+
+
 // DELETE AN ELEMENT FROM THE TREE
 function pop(startingNode, key) {
   let node = startingNode;
@@ -415,6 +436,19 @@ self.addEventListener('message', (event) => {
       }
       break;    
     }
+    case 'Max': {
+      const key = event.data[1]; 
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']);
+      }
+      else {
+        maximo(root);
+        unhighlightAll(root); 
+        self.postMessage([root, msg, 'Finished']); 
+      }
+      break;    
+    }
+
     
     default: break;
   }

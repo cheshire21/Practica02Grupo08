@@ -32,6 +32,7 @@ let deleteButton;
 let searchForm;
 let searchButton;
 let minButton;
+let maxButton;
 let lastMsg = '';
 let printOutput = '';
 let value;
@@ -47,6 +48,7 @@ function enableUI() {
   searchForm.removeAttribute('disabled');
   searchButton.removeAttribute('disabled');
   minButton.removeAttribute('disabled');
+  maxButton.removeAttribute('disabled');
 }
 
 function disableUI() {
@@ -57,6 +59,7 @@ function disableUI() {
   searchForm.attribute('disabled', '');
   searchButton.attribute('disabled', '');
   minButton.attribute('disabled', '');
+  maxButton.attribute('disabled', '');
 }
 
 function displayNode(curr,x, y,cont, size = 10, hsplit = 10, vsplit = 20) {
@@ -156,6 +159,20 @@ function val_min() {
   };
   return 0;
 }
+function val_max() {
+  lastMsg = '';
+  printOutput = '';
+  disableUI();
+  value=0;
+  payload = ['Maximo', value,width];
+  Btree.postMessage(payload); // send message 'Find' and inputted value to ask the Tree to find an element
+  Btree.onmessage = function (event) {
+    tree = event.data[0]; // receive our tree modifications from the Btree so the browser's main thread can display changes at each step in the algo instead of the final change
+    lastMsg = event.data[1]; // also receive message from the Btree after each step in the algorithm is done
+    if (event.data[2] === 'Finished') enableUI();
+  };
+  return 0;
+}
 
 function addControls(type, name, onClick) {
   let element;
@@ -205,6 +222,7 @@ function setup() {
   searchForm = addControls('Input', '', '');
   searchButton = addControls('Button', 'Find', find);
   minButton = addControls('Button', 'MinValor', val_min);
+  maxButton = addControls('Button', 'MaxValor', val_max);
   // END VISUALIZATION CONTROLS STUFF
 
   // SET CANVAS AND TEXT SIZE
