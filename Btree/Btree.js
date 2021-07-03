@@ -68,6 +68,23 @@ function minimo_value(node) {
     return node.keys[0];    
   }
 }
+
+// BUSCANDO EL MÁXIMO ELEMENTO EN EL B-TREE
+function max_value(node) {  
+if(node.childs.length !== 0) {
+    msg = 'El máximo atual es ' + node.keys[(node.keys.length-1)] + '. nos vamos a la última página.';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return max_value(node.childs[(node.childs.length-1)]);
+  }
+  else{
+    msg = 'El máximo final es: ' + node.keys[(node.keys.length-1)] + ' ';
+    self.postMessage([root, msg, '']);
+    sleep(delay); 
+    return node.keys[(node.keys.length-1)];    
+  }
+}
+
 function pop(startingNode, key) {
   // 
 }
@@ -188,6 +205,16 @@ self.addEventListener('message', (event) => {
       }
       else {
         minimo_value(root);
+        self.postMessage([root, msg, 'Finished']); 
+      }
+      break;    
+    }
+    case 'Maximo': {
+      if (root == null) {
+        self.postMessage([root, 'Tree is empty', 'Finished']);
+      }
+      else {
+        max_value(root);
         self.postMessage([root, msg, 'Finished']); 
       }
       break;    
