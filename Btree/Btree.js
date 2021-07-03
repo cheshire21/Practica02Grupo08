@@ -84,10 +84,43 @@ if(node.childs.length !== 0) {
     return node.keys[(node.keys.length-1)];    
   }
 }
-
-function pop(startingNode, key) {
-  // 
+// GET INDEX VALUE FROM ARRAY
+function popindex(node, key) {
+  let j = 0;
+  for(i=0;i<node.keys.length;i++){
+    if (key == node.keys[i]){
+      msg = 'Se encontro el elemento ' +key ;
+      j=i;
+      break;
+    }
+  }
+  return j;
 }
+
+// ELIMINAR UN NODO
+function pop(node, key) {
+  if (node.childs.length == 0){
+    if(node.keys.find(element => element == key) != undefined){
+      msg = 'Se encontro el elemento ' +key ;
+      var j=popindex(node,key);
+      var ja=node.keys;
+      var ja=ja.splice(j,1);
+      var xnode=null;
+      for(var z=0;z<node.keys.length;z++){
+        var k=node.keys[z];
+        sleep(delay); 
+        xnode=push(xnode,k)
+      } 
+      msg = 'Actualizando el arbol';  
+      return xnode;
+    }else{
+      msg = 'No se encontro el elemento ' +key ;
+      return ;
+    }
+  }
+  
+}
+
 function split(node) {
   if (node.keys.length !== node.degree - 1) {
     return;
@@ -183,7 +216,7 @@ self.addEventListener('message', (event) => {
       }
       else {
         root = pop(root, key); 
-        updatePosition(root); 
+        //updatePosition(root); 
         self.postMessage([root, msg, 'Finished']); 
       }
       break;
